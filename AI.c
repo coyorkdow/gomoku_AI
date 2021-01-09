@@ -19,9 +19,18 @@ void init_AI() {
   dir_vec[7].x = 1, dir_vec[7].y = -1;
 }
 
+static inline bool has_neighbor(int x, int y) {
+  int nx, ny;
+  for (int i = 0; i < 8; i++) {
+    nx = x + dir_vec[i].x, ny = y + dir_vec[i].y;
+    if (!OUT_OF_BORDER(nx, ny) && board[nx][ny] != BLANK) return true;
+  }
+  return false;
+}
+
 double negmax(STATE player, pos pre, int depth, double alpha, double beta) {
   if (depth == 0 || player_win(!player, pre)) {
-    return estimate_score(player);
+    return -estimate_score(player);
   }
 
   double val;
@@ -29,6 +38,7 @@ double negmax(STATE player, pos pre, int depth, double alpha, double beta) {
   for (int i = 0; i < 15; i++) {
     for (int j = 0; j < 15; j++) {
       if (board[i][j] != BLANK) continue;
+      if (!has_neighbor(i, j)) continue;
       board[i][j] = player;
       p = (pos){i, j, player};
       append(&search_stack, p);
@@ -40,9 +50,10 @@ double negmax(STATE player, pos pre, int depth, double alpha, double beta) {
 
       if (val > alpha) {
         if (depth == DEPTH) {
+          printf("val=%d\n", val);
           nxt_step = p;
         }
-        if (val > beta) {
+        if (val >= beta) {
           return -val;
         }
         alpha = val;
@@ -88,11 +99,11 @@ static inline shape get_shape_through_direction(STATE player, pos p, pos vec) {
   } while (0)
 
   DRAW_SHAPE;
-  if (!OUT_OF_BORDER(x, y) && board[x][y] == BLANK) {
-    S.buffer[S.len++] = BLANK;
-    x += vec.x, y += vec.y;
-  }
-  DRAW_SHAPE;
+  // if (!OUT_OF_BORDER(x, y) && board[x][y] == BLANK) {
+  //   S.buffer[S.len++] = BLANK;
+  //   x += vec.x, y += vec.y;
+  // }
+  // DRAW_SHAPE;
 
 #undef DRAW_SHAPE
 
@@ -105,55 +116,38 @@ static inline shape get_shape_through_direction(STATE player, pos p, pos vec) {
 }
 
 static inline double calculate_score_through_shape(shape s) {
+
   int space = s.front_space + s.back_space;
-  int front_pieces_cnt = 0;
-  for (int i = 0; i < s.len && s.buffer[i] != BLANK; i++) front_pieces_cnt++;
+
+  double val;
 
   if (s.player_pieces_cnt >= 5) {
-    puts("s.player_pieces_cnt >= 5");
-    if (s.len == s.player_pieces_cnt) return WIN;
-    if (space == 0) return OPPONENT_MUST_DEFEND;
-    if (front_pieces_cnt == 1 && s.back_space) {
-      return NXT_STEP_WIN;
-    }
-    if (front_pieces_cnt == 4 && s.front_space) {
-      return NXT_STEP_WIN;
-    }
-    return OPPONENT_MUST_DEFEND;
-  }
-  if (s.player_pieces_cnt == 4) {
-    printf("s.player_pieces_cnt == 4, s.front_space =%d s.back_space=%d\n",
-           s.front_space, s.back_space);
-    if (s.len == s.player_pieces_cnt) {
-      if (space == 2) return NXT_STEP_WIN;
-      if (space == 1) return OPPONENT_MUST_DEFEND;
-      return USELESS;
-    }
-    return OPPONENT_MUST_DEFEND;
-  }
-  if (s.player_pieces_cnt == 3) {
+    val = WIN;
+    // printf("s.player_pieces_cnt >= 5, val=%lf\n", val);
+  } else if (s.player_pieces_cnt == 4) {
+    val = NXT_STEP_WIN;
+    // printf("s.player_pieces_cnt == 4, val=%lf\n", val);
+  } else if (s.player_pieces_cnt == 3) {
+    val = OPPONENT_MUST_DEFEND;
     // puts("s.player_pieces_cnt == 3");
-    if (space == 0) return USELESS;
-    if (s.len == s.player_pieces_cnt) {
-      if (space == 2) return OPPONENT_MUST_DEFEND;
-      return NORMAL_2;
+    if (space == 0) {
+      val = USELESS;
     }
-    return NORMAL_1;
-  }
-  if (s.player_pieces_cnt == 2) {
-    if (space == 0) return USELESS;
-    if (s.len == s.player_pieces_cnt) return NORMAL_1;
-    return NORMAL_0;
+  } else if (s.player_pieces_cnt == 2) {
+    val = NORMAL_2;
+  } else if (space == 0) {
+    val = USELESS;
+  } else {
+    val = NORMAL_0;
   }
 
-  if (space == 0) return USELESS;
-  return NORMAL_0;
+  return val;
 }
 
 double estimate_score(STATE player) {
   double player_score = 0, opponent_score = 0;
   for (int i = 0; i < search_stack.len; i++) {
-    for (int j = 0; j < 8; j++) {
+    for (int j = 0; j < 8; j += 2) {
       if (search_stack.list[i].state == player) {
         player_score +=
             calculate_score_through_shape(get_shape_through_direction(

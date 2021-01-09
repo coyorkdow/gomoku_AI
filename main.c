@@ -71,17 +71,28 @@ int main() {
   int x, y;
   while (++cnt <= MAXLEN) {
     if (cnt & 1) {
-      puts("ÊäÈë×ø±ê");
+      puts("input coordinate (x, y), i.e: 4 5");
       scanf("%d%d", &x, &y);
       assert(board[x - 1][y - 1] == BLANK);
       put_piece(x, y, BLACK);
-      // system("cls");
+      system("cls");
       draw_board();
+
+      if (player_win(BLACK, (pos){x - 1, y - 1})) {
+        puts("you are win");
+        return 0;
+      }
     } else {
       negmax(WHITE, (pos){}, DEPTH, -1e9, 1e9);
       put_piece(nxt_step.x + 1, nxt_step.y + 1, WHITE);
-      // system("cls");
+      system("cls");
       draw_board();
+
+      if (player_win(WHITE, nxt_step)) {
+        puts("you are lose");
+        return 0;
+      }
     }
   }
+  puts("there is a draw, game over");
 }
