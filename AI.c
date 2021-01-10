@@ -50,7 +50,7 @@ double negmax(STATE player, pos pre, int depth, double alpha, double beta) {
 
       if (val > alpha) {
         if (depth == DEPTH) {
-          printf("val=%d\n", val);
+          // printf("val=%d\n", val);
           nxt_step = p;
         }
         if (val >= beta) {
@@ -116,7 +116,6 @@ static inline shape get_shape_through_direction(STATE player, pos p, pos vec) {
 }
 
 static inline double calculate_score_through_shape(shape s) {
-
   int space = s.front_space + s.back_space;
 
   double val;

@@ -51,8 +51,8 @@ static inline void pop(struct pieces_list *l);
 #define NORMAL_0 50
 #define USELESS 0
 
-#define DEPTH 3
-#define RATIO 0.1
+#define DEPTH 5
+#define RATIO 1
 
 int maxlen;
 #define max(a, b) (a > b ? a : b)

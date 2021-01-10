@@ -71,6 +71,7 @@ int main() {
   int x, y;
   while (++cnt <= MAXLEN) {
     if (cnt & 1) {
+      puts("yout play black");
       puts("input coordinate (x, y), i.e: 4 5");
       scanf("%d%d", &x, &y);
       assert(board[x - 1][y - 1] == BLANK);
