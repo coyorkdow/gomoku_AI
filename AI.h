@@ -38,7 +38,7 @@ struct pieces_list search_stack;
 double negmax(STATE player, pos pre, int depth, double alpha, double beta);
 
 bool player_win(STATE player, pos p);
-double estimate_score(STATE player);
+static inline double estimate_score(STATE player);
 
 static inline void append(struct pieces_list *l, pos p);
 static inline void pop(struct pieces_list *l);

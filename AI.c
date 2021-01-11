@@ -13,7 +13,7 @@ void init_AI() {
   dir_vec[3].x = 1, dir_vec[3].y = 0;
 
   dir_vec[4].x = -1, dir_vec[4].y = -1;
-  dir_vec[5].x = 1, dir_vec[0].y = 1;
+  dir_vec[5].x = 1, dir_vec[5].y = 1;
 
   dir_vec[6].x = -1, dir_vec[6].y = 1;
   dir_vec[7].x = 1, dir_vec[7].y = -1;
@@ -123,19 +123,16 @@ static inline double calculate_score_through_shape(shape s) {
   if (s.player_pieces_cnt >= 5) {
     val = WIN;
     // printf("s.player_pieces_cnt >= 5, val=%lf\n", val);
+  } else if (space == 0) {
+    val = USELESS;
   } else if (s.player_pieces_cnt == 4) {
     val = NXT_STEP_WIN;
     // printf("s.player_pieces_cnt == 4, val=%lf\n", val);
   } else if (s.player_pieces_cnt == 3) {
     val = OPPONENT_MUST_DEFEND;
     // puts("s.player_pieces_cnt == 3");
-    if (space == 0) {
-      val = USELESS;
-    }
   } else if (s.player_pieces_cnt == 2) {
     val = NORMAL_2;
-  } else if (space == 0) {
-    val = USELESS;
   } else {
     val = NORMAL_0;
   }
@@ -143,7 +140,7 @@ static inline double calculate_score_through_shape(shape s) {
   return val;
 }
 
-double estimate_score(STATE player) {
+static inline double estimate_score(STATE player) {
   double player_score = 0, opponent_score = 0;
   for (int i = 0; i < search_stack.len; i++) {
     for (int j = 0; j < 8; j += 2) {
@@ -164,7 +161,7 @@ double estimate_score(STATE player) {
 
 bool player_win(STATE player, pos p) {
   shape s;
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < 8; i += 2) {
     s = get_shape_through_direction(player, p, dir_vec[i]);
     if (s.player_pieces_cnt == 5 && s.len == 5) return true;
   }

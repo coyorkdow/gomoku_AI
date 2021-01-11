@@ -8,6 +8,7 @@ char display_board[1 + 15 * 2][EDGE + 15 * 3 + 16 + 1];
 char color[2] = {'B', 'W'};
 
 static inline void put_piece(int x, int y, STATE player) {
+  assert(board[x - 1][y - 1] == BLANK);
   display_board[x * 2 - 1][y * 4] = color[player];
   board[x - 1][y - 1] = player;
 }
@@ -72,9 +73,8 @@ int main() {
   while (++cnt <= MAXLEN) {
     if (cnt & 1) {
       puts("yout play black");
-      puts("input coordinate (x, y), i.e: 4 5");
+      puts("input coordinate (x, y), i.e: 7 7");
       scanf("%d%d", &x, &y);
-      assert(board[x - 1][y - 1] == BLANK);
       put_piece(x, y, BLACK);
       system("cls");
       draw_board();
@@ -88,6 +88,9 @@ int main() {
       put_piece(nxt_step.x + 1, nxt_step.y + 1, WHITE);
       system("cls");
       draw_board();
+
+      printf("on previous move computer put the piece on (%d, %d)\n",
+             nxt_step.x + 1, nxt_step.y + 1);
 
       if (player_win(WHITE, nxt_step)) {
         puts("you are lose");
